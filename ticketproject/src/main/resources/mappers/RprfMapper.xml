@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.RprfMapper">
+
+	<select id="selectPerformanceListByUser" parameterType="string" resultType="RprfVO">
+	    SELECT rprf.*, hall.fcltynm, performance.prfnm
+	    FROM rprf
+	    JOIN hall ON rprf.hallid = hall.hallid
+	    JOIN performance ON rprf.prfid = performance.prfid
+	    WHERE hall.userid = #{userid};
+	</select>
+	<select id="selectHallInfoByHallId" resultType="HallVO">
+	 SELECT hallid, allseatcnt FROM hall WHERE hallid = #{hallid} 
+	</select>
+
+
+
+</mapper>
+
+
+

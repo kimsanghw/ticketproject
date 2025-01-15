@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.PrfimgMapper">
+	<!--  공연 번호로 이미지 조회  -->
+	<select id="selectPrfimgByPrfId" parameterType="int" resultType="PrfImgVO">
+	 SELECT prfimgid, poster, prfid FROM prfimg WHERE prfid = #{prfid}
+	 </select>
+	 
+	<insert id="insertPrfimg" parameterType="PrfImgVO">
+        INSERT INTO prfimg (poster, prfid) VALUES (#{poster}, #{prfid})
+    </insert>
+	<!--  이미지 데이터 업데이트  -->
+	<update id="updatePrfimg" parameterType="PrfImgVO"> 
+		UPDATE prfimg SET poster = #{poster} WHERE prfid = #{prfid} 
+	</update>
+	
+	<select id="checkPrfimgExists" parameterType="PrfImgVO" resultType="int">
+	    SELECT COUNT(*) FROM prfimg WHERE prfid = #{prfid}
+	</select>
+	
+    <!-- 모든 이미지 조회 -->
+    <select id="getAllPrfimgs" resultType="PrfImgVO">
+        SELECT * FROM prfimg 
+    </select>
+	
+	<select id="getPrfImg" resultType="java.util.List">
+		SELECT prfid FROM prfimg
+	</select>
+	
+	<update id="updateStyurl" parameterType="java.util.List">
+	    <foreach collection="list" item="item" separator=";">
+	        UPDATE prfimg i
+	        INNER JOIN performance p ON i.prfid = p.prfid
+	        SET i.styuri1 = #{item.styuri1}, 
+	            i.styuri2 = #{item.styuri2}, 
+	            i.styuri3 = #{item.styuri3}, 
+	            i.styuri4 = #{item.styuri4}
+	        WHERE p.mt20id = #{item.mt20id}
+	    </foreach>
+	</update>
+
+</mapper>
+
+
+

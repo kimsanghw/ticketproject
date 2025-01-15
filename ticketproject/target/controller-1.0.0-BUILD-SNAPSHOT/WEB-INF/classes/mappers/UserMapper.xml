@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.userMapper">
+
+	<insert id="userInsert" parameterType="userVO">
+		INSERT INTO user(userid, upassword, name, email, phone, birth 
+		) VALUES (
+			#{userId}, #{upassword}, #{name}, #{email}, #{phone}, #{birth}
+		)
+	</insert>
+	<insert id="hallInsert" parameterType="hallVO">
+		INSERT INTO hall(userid, hpassword, fcltynm, halladdress, hallphone, img, chgimg)
+		VALUES (
+			#{userId}, #{hpassword}, #{fcltynm}, #{hallAddress}, #{hallPhone}, #{img}, #{chgImg}
+		)
+	</insert>
+	<select id="selectOneById" parameterType="String" resultType="java.util.Map">
+		select *
+		from((select userid, upassword,enabled,authority from user)
+		union all
+		(select userid, hpassword as upassword,enabled,authority  from hall)
+		) all_user
+		where userid = #{userId};
+	</select>
+	<select id="findEmail" parameterType="String" resultType="int">
+		select count(email) from user where email = #{email}
+	</select>
+</mapper>
+
+
+
