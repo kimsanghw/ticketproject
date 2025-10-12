@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.ReportMapper">
+	<insert id="insertReport" parameterType="ReportVO">
+		INSERT INTO report (reporttype,content,reviewid,userid)VALUES(#{reporttype},#{content},#{reviewid},#{userid})
+		<selectKey order="AFTER" resultType="int" keyProperty="reportid">
+			SELECT MAX(reportid) FROM report
+		</selectKey>
+	</insert>
+	<select id="reportList" resultType="ReportVO" parameterType="SearchVO">
+		SELECT r.*, 
+		       p.prfnm, 
+		       rv.content AS reviewContent, 
+		       rv.userid AS reviewUserId
+		FROM report r
+		JOIN review rv ON r.reviewid = rv.reviewid
+		JOIN rprf rp ON rv.rprfid = rp.rprfid
+		JOIN performance p ON rp.prfid = p.prfid
+		<where>
+		    r.process != 'E'
+		    AND rv.state != 'D'
+		    <if test="searchType != null and searchValue != null and searchValue != ''">
+		        <choose>
+		            <when test="searchType == 'search_prfnm'">
+		                AND p.prfnm LIKE CONCAT('%', #{searchValue}, '%')
+		            </when>
+		            <when test="searchType == 'search_reporttype'">
+		                AND r.reporttype LIKE CONCAT('%', #{searchValue}, '%')
+		            </when>
+		            <when test="searchType == 'search_content'">
+		                AND rv.content LIKE CONCAT('%', #{searchValue}, '%')
+		            </when>
+		        </choose>
+		    </if>
+		</where>
+		ORDER BY r.reportid DESC
+		LIMIT #{start}, #{perPage}
+	</select>
+
+    <!-- 총 데이터 개수 조회 -->
+    <select id="selectTotal" resultType="int" parameterType="SearchVO">
+	    SELECT COUNT(*) AS total
+	    FROM report r
+	    JOIN review rv ON r.reviewid = rv.reviewid
+	    JOIN rprf rp ON rv.rprfid = rp.rprfid
+	    JOIN performance p ON rp.prfid = p.prfid
+	    <where>
+	        r.process != 'E'  -- 처리된 신고 제외
+	        AND rv.state != 'D'  -- 삭제된 리뷰 제외
+	        <if test="searchType != null and searchType == 'search_prfnm'">
+	            AND p.prfnm LIKE CONCAT('%', #{searchValue}, '%')
+	        </if>
+	        <if test="searchType != null and searchType == 'search_reporttype'">
+	            AND r.reporttype LIKE CONCAT('%', #{searchValue}, '%')
+	        </if>
+	        <if test="searchType != null and searchType == 'search_content'">
+	            AND rv.content LIKE CONCAT('%', #{searchValue}, '%')
+	        </if>
+	    </where>
+	</select>
+	<update id="reportChangeProcess" parameterType="int">
+		UPDATE 
+		    report r
+		JOIN 
+		    review rw 
+		ON 
+		    r.reviewid = rw.reviewid
+		SET 
+		    r.process = 'E',
+		    r.processdate = NOW(),
+		    rw.state = 'D'
+		WHERE 
+		    r.reportid = #{reportid};
+			
+	</update>
+</mapper>
+
+
+

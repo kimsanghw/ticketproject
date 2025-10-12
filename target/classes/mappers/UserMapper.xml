@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.userMapper">
+
+	<insert id="userInsert" parameterType="userVO">
+		INSERT INTO user(userid, upassword, name, email, phone, birth 
+		) VALUES (
+			#{userid}, #{upassword}, #{name}, #{email}, #{phone}, #{birth}
+		)
+	</insert>
+	<insert id="hallInsert" parameterType="hallVO">
+		INSERT INTO hall(userid, hpassword, fcltynm, halladdress, hallphone, img, chgimg)
+		VALUES (
+			#{userid}, #{hpassword}, #{fcltynm}, #{halladdress}, #{hallPhone}, #{img}, #{chgImg}
+		)
+	</insert>
+	<select id="selectOneById" parameterType="String" resultType="java.util.Map">
+		select *
+		from((select userid, upassword,enabled,authority from user)
+		union all
+		(select userid, hpassword as upassword,enabled,authority  from hall)
+		) all_user
+		where userid = #{userid};
+	</select>
+	<select id="findEmail" parameterType="String" resultType="int">
+		select count(email) from user where email = #{email}
+	</select>
+	<select id="idCheck" parameterType="String" resultType="int">
+		SELECT count(*) FROM((SELECT userid FROM user)
+		union all
+		(SELECT userid FROM hall)) all_user WHERE userid = #{userid};
+	</select>
+	<select id="userList" parameterType="SearchVO" resultType="userVO" >
+		SELECT userid,name,email,phone FROM user WHERE authority='ROLE_USER' LIMIT #{start}, #{perPage}
+	</select>
+	<select id="selectUserTotal"  resultType="int" parameterType="SearchVO" >
+		SELECT count(*) AS userTotal FROM  user WHERE authority='ROLE_USER' 
+	</select>
+	
+	<select id="selectHallTotal" resultType="int" parameterType="SearchVO" >
+		SELECT count(*) AS hallTotal FROM hall
+	</select>
+	<select id="selectReservationTotal" resultType="int" parameterType="SearchVO">
+		SELECT 
+	        COUNT(*) 
+	    FROM 
+	        reservation r
+	    JOIN 
+	        rprf rp ON r.rprfid = rp.rprfid
+	    JOIN 
+	        performance p ON rp.prfid = p.prfid
+	    
+	</select>
+</mapper>
+
+
+

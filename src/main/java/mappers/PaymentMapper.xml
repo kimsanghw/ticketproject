@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.PaymentMapper">
+
+    <insert id="insertPaymentInfo" parameterType="OrderCreateForm">
+        INSERT INTO payment(tid, amounttotal, partnerorderid, partneruserid, itemname, quantity, reservationid)
+        VALUES (
+            #{tid}, #{totalPrice}, #{partnerorderid}, #{partneruserid}, #{name}, #{quantity}, #{reservationid}
+        )
+    </insert>
+
+    <select id="findPayInfo" parameterType="String" resultType="OrderCreateForm">
+        SELECT * FROM payment WHERE tid = #{tid}
+    </select>
+
+</mapper>

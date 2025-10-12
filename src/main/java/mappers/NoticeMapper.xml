@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.NoticeMapper">
+
+	<select id="selectAll" resultType="NoticeVO" parameterType="SearchVO">
+		SELECT n.*, u.userid
+			FROM notice n, user u
+			WHERE u.userid = n.userid 
+			AND n.state = 'E'
+			<if test="searchType != null and searchType.equals('title')">
+			AND n.title like concat('%',#{searchValue},'%')
+			</if>
+			<if test="searchType != null and searchType.equals('content')">
+			AND n.content like concat('%',#{searchValue},'%')
+			</if>
+			ORDER BY n.nno DESC
+			limit #{start},#{perPage}
+	</select>
+	
+	<insert id="insertNoticeWrite" parameterType="NoticeVO">
+	
+		INSERT INTO notice(
+					title,content,userid)
+			VALUES(
+					#{title},#{content},#{userid})
+		<selectKey order="AFTER" resultType="int" keyProperty="nno">
+			SELECT MAX(nno) FROM notice
+		</selectKey>		
+	</insert>
+	
+	<select id="selectOne" parameterType="int"  resultType="NoticeVO" >
+		SELECT n.*,u.userid FROM notice n, user u WHERE n.userid = u.userid AND n.nno =#{nno}
+	</select>
+	<update id="noticeUpdate" parameterType="NoticeVO">
+		UPDATE notice 
+			SET title = #{title}, content = #{content}
+			WHERE nno = #{nno}
+		
+	</update>
+	
+	<update id="changeState" parameterType="int">
+		UPDATE notice
+			SET state = 'D'
+			WHERE nno = #{nno}
+	</update>
+	
+	<select id="selectTotal" resultType="int" parameterType="SearchVO" >
+		SELECT count(*) AS total 
+			FROM notice n, user u 
+			WHERE u.userid = n.userid 
+			AND n.state = 'E'
+			<if test="searchType != null and searchType.equals('title')">
+			AND n.title like concat('%',#{searchValue},'%')
+			</if>
+			<if test="searchType != null and searchType.equals('content')">
+			AND n.content like concat('%',#{searchValue},'%')
+			</if>
+			<!-- limit #{start},#{perPage} -->
+	</select>
+</mapper>
+
+
+

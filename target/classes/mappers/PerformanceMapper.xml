@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ticketproject.mapper.PerformanceMapper">
+	<!--  공연 ID로 데이터 조회  -->
+	<select id="selectPerformanceByMt20id" parameterType="String" resultType="PerformanceVO"> 
+		SELECT prfid, mt20id, prfnm FROM performance WHERE mt20id = #{mt20id} 
+	</select>
+
+
+    <!-- 공연 삽입 -->
+    <insert id="insertPerformance" parameterType="PerformanceVO" useGeneratedKeys="true" keyProperty="prfid">
+        INSERT INTO performance (mt20id, prfnm) VALUES (#{mt20id}, #{prfnm})
+    </insert>
+
+    <!-- 공연 업데이트 -->
+    <update id="updatePerformance" parameterType="PerformanceVO">
+        UPDATE performance SET prfnm = #{prfnm} WHERE mt20id = #{mt20id}
+    </update>
+
+    <!-- 모든 공연 조회 -->
+    <select id="getAllPerformances" resultType="PerformanceVO">
+        SELECT * FROM performance order by prfpdto desc, prfpdfrom desc
+    </select>
+    
+    <!-- 공연 검색 -->
+    <select id="searchPerformances" parameterType="string" resultType="PerformanceVO">
+    	SELECT prfid, prfnm
+        FROM performance
+        WHERE prfnm LIKE CONCAT('%', #{keyword}, '%');
+    </select>
+    
+    <!-- 공연 등록 -->
+    <insert id="performance_write" parameterType="RprfVO" useGeneratedKeys="true" keyProperty="rprfid">
+    	INSERT INTO rprf (state, date, time, time2, prfid, hallid) VALUES ('E', #{date}, #{time}, #{time2}, #{prfid}, #{hallid})
+    </insert>
+    
+    <!-- 공연장 회원 주소 조회 -->
+    <select id="viewPerformance" parameterType="String" resultType="HallVO">
+    	SELECT * FROM hall WHERE userid = #{hallid}
+    </select>
+    
+    <!-- 공연 상세페이지 조회 -->
+    <select id="performanceView" parameterType="int" resultType="RprfVO">
+	    	SELECT 
+	        r.rprfid,
+	        r.date,
+	        r.time,
+	        r.time2,
+	        r.hallid,
+	        p.prfnm,
+	        h.halladdress  
+	    FROM 
+	        rprf r
+	    JOIN 
+	        performance p ON r.prfid = p.prfid
+	    INNER JOIN 
+	        hall h ON r.hallid = h.hallid
+	    WHERE 
+	        r.rprfid = #{rprfid}
+    </select>
+    <update id="performanceModify" parameterType="RprfVO">
+    		UPDATE rprf
+    	SET
+	        prfid = #{prfid},
+	        date = #{date},
+	        time = #{time},
+	        time2 = #{time2},
+	        hallid = #{hallid}
+    	WHERE rprfid = #{rprfid}
+    </update>
+    
+        <!-- 공연 삭제 -->
+    <update id="performance_delete" parameterType="int">
+    	UPDATE rprf set state='D' WHERE rprfid = #{rprfid}
+    </update>
+    
+    <!-- 공연상세조회를 요청하기 위해 모든 mt20id 가져오기 -->
+    <select id="selectAllmt20id" resultType="PerformanceVO">
+    	SELECT mt20id FROM performance
+    </select>
+    <!-- 응답온 데이터 각 항목에 맞게 집어넣기 -->
+	<update id="updatePrfInfo" parameterType="java.util.List">
+    	<foreach collection="list" item="item" separator=";">
+        UPDATE performance 
+        SET prfcast = #{item.prfcast}, 
+            prfcrew = #{item.prfcrew}, 
+            prfruntime = #{item.prfruntime}, 
+            pcseguidance = #{item.pcseguidance}, 
+            prfpdfrom = #{item.prfpdfrom}, 
+            prfpdto = #{item.prfpdto} 
+        WHERE mt20id = #{item.mt20id}
+    	</foreach>
+	</update>
+	
+	<!-- 공연 정보 불러오기 -->
+	<select id="prfCheck" parameterType="int" resultType="PerformanceVO">
+    	SELECT * FROM performance WHERE prfid = #{prfid}
+	</select>
+	
+	<!-- 공연 포스터 불러오기 -->
+	<select id="prfImg" parameterType="int" resultType="PrfImgVO">
+    	SELECT * FROM prfimg WHERE prfid = #{prfid} ORDER BY prfimgid DESC LIMIT 1;
+	</select>
+	
+	<select id="getUnavailableDates" parameterType="int" resultType="String">
+	    SELECT DISTINCT date 
+	    FROM rprf 
+	    WHERE prfid = #{prfid} AND state = 'E'
+	</select>
+	<select id="findRprfidByPrfid"  parameterType="int" resultType="Integer">
+		SELECT rprfid FROM rprf WHERE prfid = #{prfid}  
+		ORDER BY rprfid DESC
+    	LIMIT 1;
+	</select>
+	<select id="selectMt20id" resultType="String">
+		SELECT mt20id FROM performance;
+	</select>
+	
+</mapper>
+
+
+
