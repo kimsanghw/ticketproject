@@ -8,9 +8,9 @@ import com.ticketproject.vo.UserVO;
 
 public interface MyService {
 
-	public UserVO selectOne(String userid); // �궗�슜�옄 �젙蹂� 議고쉶
+	public UserVO selectOne(String userid); 
 	
-    // 留덉씠�럹�씠吏� �쑀���젙蹂� �뾽�뜲�씠�듃
+
     public int updateUserInfo(UserVO userVO);
     
     public List<ReportVO> allReport(String userid);

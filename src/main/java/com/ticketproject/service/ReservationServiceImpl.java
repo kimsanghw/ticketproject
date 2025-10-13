@@ -24,7 +24,7 @@ public class ReservationServiceImpl implements ReservationService {
     public int insertReservation(ReservationVO reservation) {
         reservationDAO.insertReservation(reservation);
      
-        return reservation.getReservationid(); // �깮�꽦�맂 PK 媛� 諛섑솚
+        return reservation.getReservationid(); 
     }
 	
 	@Override

@@ -12,13 +12,11 @@ import com.ticketproject.vo.ReservationVO;
 import com.ticketproject.vo.UserVO;
 
 
-@Service //�뾽臾대줈吏곸쓣 �떞�떦�븯�뒗 援ы쁽 媛앹껜瑜� �뒪�봽留곸씠 �깮�꽦�븯�뿬 愿�由�
+@Service
 public class MyServicelmpl implements MyService{
 	
-//  @Autowired瑜� �넻�빐 �옄�룞�쑝濡� 媛앹껜瑜� �깮�꽦 諛� 二쇱엯�븯�뿬 媛쒕컻�쓣 �렪由ы븯寃� �빐以�.
-	
-	@Autowired // �쓽議댁꽦�쓣 �옄�룞�쑝濡� 二쇱엯 �빐二쇰뒗 �뼱�끂�뀒�씠�뀡
-	public MyDAO myDAO; // UserDAO 媛앹껜瑜� �옄�룞�쑝濡� 二쇱엯
+	@Autowired
+	public MyDAO myDAO; 
 	
 	@Override
 	public UserVO selectOne(String userid) {
@@ -49,7 +47,5 @@ public class MyServicelmpl implements MyService{
 	public List<ReservationVO> selectReservation(String userid) {
 		return myDAO.selectReservation(userid);
 	}
-	
-
 	
 }
