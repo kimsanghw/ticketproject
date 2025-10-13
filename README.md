@@ -556,15 +556,15 @@ public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<P
   ```
 
 - **신고 팝업 오픈**
-```jsp
-	function declarationPopup(reviewid){
-	  const w=1000,h=900,x=(screen.width-w)/2,y=(screen.height-h)/2;
-	  const url='${pageContext.request.contextPath}/declaration.do?reviewid='+reviewid;
-	  const win=open(url,'declarationPopup',`width=${w},height=${h},top=${y},left=${x},resizable=no`);
-	  if(!win){ alert('팝업 차단 설정을 확인해주세요.'); }
-	}
-
-```
+	```jsp
+		function declarationPopup(reviewid){
+		  const w=1000,h=900,x=(screen.width-w)/2,y=(screen.height-h)/2;
+		  const url='${pageContext.request.contextPath}/declaration.do?reviewid='+reviewid;
+		  const win=open(url,'declarationPopup',`width=${w},height=${h},top=${y},left=${x},resizable=no`);
+		  if(!win){ alert('팝업 차단 설정을 확인해주세요.'); }
+		}
+	
+	```
 ---
   
 
