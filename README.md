@@ -399,37 +399,37 @@ ticketproject/
 	  VALUES (#{mt20id}, #{prfnm})
 	</insert>
 	```
--**Service 구현**
+- **Service 구현**
 	```java
-	// com.ticketproject.service.PerformanceServiceImpl
-	@Transactional
-	public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<PrfImgVO> prfimgList) {
-	    for (PerformanceVO performance : performanceList) {
-	        // 1) 공연 존재 여부 확인
-	        PerformanceVO existingPerformance =
-	            performanceDAO.selectPerformanceByMt20id(performance.getMt20id());
-	
-	        int prfid;
-	        if (existingPerformance == null) {
-	            // 2) 신규면 INSERT (useGeneratedKeys=true 로 prfid 세팅)
-	            performanceDAO.insertPerformance(performance);
-	            prfid = performance.getPrfid();
-	        } else {
-	            // 3) 기존이면 prfid 재사용
-	            prfid = existingPerformance.getPrfid();
-	        }
-	
-	        // 4) 포스터(PrfImg) 저장
-	        for (PrfImgVO prfimg : prfimgList) {
-	            // 현재 매칭 기준은 prfid. (빌드 시점/저장 시점 차이 주의)
-	            if (performance.getPrfid() == prfimg.getPrfid()) {
-	                prfimg.setPrfid(prfid);       // 정확한 FK 주입
-	                prfimgDAO.insertPrfimg(prfimg);
-	                break;
-	            }
-	        }
-	    }
-	}
+		// com.ticketproject.service.PerformanceServiceImpl
+		@Transactional
+		public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<PrfImgVO> prfimgList) {
+		    for (PerformanceVO performance : performanceList) {
+		        // 1) 공연 존재 여부 확인
+		        PerformanceVO existingPerformance =
+		            performanceDAO.selectPerformanceByMt20id(performance.getMt20id());
+		
+		        int prfid;
+		        if (existingPerformance == null) {
+		            // 2) 신규면 INSERT (useGeneratedKeys=true 로 prfid 세팅)
+		            performanceDAO.insertPerformance(performance);
+		            prfid = performance.getPrfid();
+		        } else {
+		            // 3) 기존이면 prfid 재사용
+		            prfid = existingPerformance.getPrfid();
+		        }
+		
+		        // 4) 포스터(PrfImg) 저장
+		        for (PrfImgVO prfimg : prfimgList) {
+		            // 현재 매칭 기준은 prfid. (빌드 시점/저장 시점 차이 주의)
+		            if (performance.getPrfid() == prfimg.getPrfid()) {
+		                prfimg.setPrfid(prfid);       // 정확한 FK 주입
+		                prfimgDAO.insertPrfimg(prfimg);
+		                break;
+		            }
+		        }
+		    }
+		}
 	```
 동작 요약: mt20id로 공연 존재 여부 검사 → 없으면 INSERT 후 생성된 prfid로 포스터 저장.
 
