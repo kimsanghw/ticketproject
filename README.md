@@ -431,7 +431,7 @@ ticketproject/
 		    }
 		}
 	```
-동작 요약: mt20id로 공연 존재 여부 검사 → 없으면 INSERT 후 생성된 prfid로 포스터 저장.
+	동작 요약: mt20id로 공연 존재 여부 검사 → 없으면 INSERT 후 생성된 prfid로 포스터 저장.
 
 
 ---
