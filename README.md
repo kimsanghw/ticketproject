@@ -428,7 +428,7 @@ ticketproject/
 
 
 - **파싱**  
-- XML 응답의 `<db>` 목록을 **JDOM2**로 파싱하여 **`mt20id`, `prfnm`, `poster`** 추출
+	- **XML 응답의 `<db>` 목록을 **JDOM2**로 파싱하여 **`mt20id`, `prfnm`, `poster`** 추출**
 
 - **저장 흐름**  
 1. `PerformanceVO(mt20id, prfnm)` 리스트 구성  
