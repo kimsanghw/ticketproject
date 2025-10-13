@@ -16,7 +16,7 @@
 - [📫 API 연동 요약](#-api-연동-요약)
 - [✅ 핵심 포인트 요약](#-핵심-포인트-요약)
 - [🔄 KOPIS 공연 데이터 자동 업데이트 — 자세한 흐름](#-kopis-공연-데이터-자동-업데이트--자세한-흐름)
-    
+- [📝 리뷰 CRUD & 신고(Declaration) — 자세한 흐름](#-리뷰-crud--신고declaration--자세한-흐름)   
 ---
 
 ## 📅 프로젝트 개요
@@ -433,4 +433,138 @@ public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<P
 ```
 동작 요약: mt20id로 공연 존재 여부 검사 → 없으면 INSERT 후 생성된 prfid로 포스터 저장.
 
+
+---
+
+## 📝 리뷰 CRUD & 신고(Declaration) — 자세한 흐름
+
+리뷰 모듈은 **작성/목록/수정/삭제(CRUD)**와 **신고(팝업)**로 구성됩니다.  
+구현은 `ReviewController → ReviewService(+Impl) → ReviewDAO → ReviewMapper.xml`(+ `Report*` 계열)로 동작합니다.  
+화면은 `performance_view.jsp`의 **탭(주요정보/리뷰)** 영역에서 동작합니다.
+
+---
+
+### 1) 화면/탭 구조
+
+- **파일**: `WEB-INF/views/performance/performance_view.jsp`
+- **탭**: `주요정보` / `리뷰` (기본은 주요정보 활성)
+- **권한/가드**
+  - `<sec:authorize access="isAuthenticated()">` : 로그인 사용자만 **리뷰 작성/신고 버튼** 표시
+  - `${rprfid != 0}` : 공연 회차/노출 조건(없으면 리뷰 작성 폼 **숨김**)
+  - 수정/삭제 버튼은 **작성자 본인**일 때만 노출 (`${loggedInUser == vo.userid}`)
+
+---
+
+### 2) 엔드포인트 요약
+
+| 동작 | 메서드/URL | 폼/호출 위치 | 설명 |
+|---|---|---|---|
+| 리뷰 작성 | `POST /reviewinsert` | 리뷰 탭 상단 폼 | `prfid`, `rating`, `content` 제출 |
+| 리뷰 목록 | (뷰 렌더링 시 조회) | `performance_view.jsp` | `reviewList` 루프 출력 (별점/내용/작성자/일시) |
+| 리뷰 수정 | `POST /reviewModify` | 각 리뷰 카드 내 **수정 폼** | 본인만 가능 |
+| 리뷰 삭제 | `POST /reviewRemove` | 각 리뷰 카드 내 **삭제 폼** | 본인만 가능 |
+| 리뷰 신고 | `GET /declaration.do?reviewid=...` | 신고 버튼(팝업) | 팝업에서 사유 입력 후 제출(신고 테이블 저장) |
+
+> 컨트롤러/서비스/DAO/매퍼 클래스 명은 프로젝트 구조에 맞춰 `Review*`, 신고는 `Report*` 네임스페이스 사용.
+
+---
+
+### 3) 요청 파라미터 & 검증 규칙
+
+#### 리뷰 작성 (`POST /reviewinsert`)
+- **입력**: `prfid`(필수), `rating`(0~5), `content`(비어있으면 불가)
+- **클라이언트 검증(JS)**:
+  - 내용이 비어있으면 `alert("리뷰 내용을 입력해 주세요.")` 후 제출 중단
+  - 별점이 `0`이면 확정 팝업(“별점을 등록하지 않으시겠습니까?”) → 취소 시 중단
+- **서버 검증(권장)**:
+  - 로그인 사용자만 허용
+  - `prfid` 유효성(존재하는 공연인지)
+  - `content` 길이/금칙어 필터
+  - 중복/스팸 방지(선택: 동일 사용자 연속 등록 쿨다운)
+
+#### 리뷰 수정 (`POST /reviewModify`)
+- **입력**: `reviewid`, `prfid`, `rating`(선택), `content`
+- **검증**:
+  - **작성자 본인** 여부 확인
+  - 내용 공백 불가
+
+#### 리뷰 삭제 (`POST /reviewRemove`)
+- **입력**: `reviewid`, `prfid`
+- **검증**:
+  - **작성자 본인** 여부 확인
+  - 물리 삭제보단 **논리 삭제(state='D')** 권장
+
+#### 리뷰 신고 팝업 (`GET /declaration.do?reviewid=...`)
+- **동작**: 팝업에서 `reviewid`, `reason`, `detail` 제출 → 신고 테이블 저장
+- **검증**:
+  - 로그인 사용자만 허용
+  - 이미 신고된 건에 대한 **중복 신고 방지**(선택)
+
+---
+
+### 4) JSP 포인트
+
+- **작성 폼 (로그인 + rprfid != 0 일 때만 노출)**
+  ```jsp
+  <form action="${pageContext.request.contextPath}/reviewinsert" method="post" onsubmit="return validateReviewForm(this);">
+    <input type="hidden" name="prfid" value="${prfCheck != null ? prfCheck.prfid : ''}">
+    <span class="star">★★★★★<span>★★★★★</span>
+      <input type="range" name="rating" id="rating" value="0" min="0" max="5" step="1" oninput="drawStar(this)">
+    </span>
+    <textarea class="review_comment" name="content" placeholder="리뷰를 입력해주세요"></textarea>
+    <div class="comment_button"><button>등록</button></div>
+  </form>
+  ```
+
+- **리스트**
+  ```jsp
+	<c:forEach items="${reviewList}" var="vo">
+	  <!-- 별점 표시: width = rating * 20% -->
+	  <span class="star">★★★★★<span style="width: ${vo.rating * 20}%;">★★★★★</span></span>
+	  <textarea class="review_comment" readonly="readonly">${vo.content}</textarea>
+	
+	  <div class="review_button">
+	    <c:if test="${loggedInUser != null && loggedInUser == vo.userid}">
+	      <button class="button_modify" onclick="showEditForm(this)">수정</button>
+	      <form action="${pageContext.request.contextPath}/reviewRemove" method="post" class="inline_form" id="removeForm${vo.reviewid}">
+	        <input type="hidden" name="prfid" value="${prfCheck != null ? prfCheck.prfid : ''}">
+	        <input type="hidden" name="reviewid" value="${vo.reviewid}">
+	        <button type="button" class="button_delete" onclick="confirmDelete(this)">삭제</button>
+	      </form>
+	    </c:if>
+	    <sec:authorize access="isAuthenticated()">
+	      <button class="button_declaration" onclick="declarationPopup('${vo.reviewid != null ? vo.reviewid : 0}')">신고</button>
+	    </sec:authorize>
+	  </div>
+	
+	  <!-- 수정 폼 (토글) -->
+	  <form action="${pageContext.request.contextPath}/reviewModify" method="post">
+	    <input type="hidden" name="prfid" value="${prfCheck != null ? prfCheck.prfid : ''}">
+	    <input type="hidden" name="reviewid" value="${vo.reviewid}">
+	    <input type="hidden" name="rdate" value="${vo.rdate}">
+	    <input type="hidden" name="rating" value="${vo.rating}">
+	    <div class="edit_form" style="display:none;">
+	      <textarea class="review_comment" name="content">${vo.content}</textarea>
+	      <div class="comment_button">
+	        <button onclick="submitEdit(this)">저장</button>
+	        <button onclick="cancelEdit(this)">취소</button>
+	      </div>
+	    </div>
+	  </form>
+	</c:forEach>
+
+  ```
+
+- **신고 팝업 오픈**
+```
+	function declarationPopup(reviewid){
+  const w=1000,h=900,x=(screen.width-w)/2,y=(screen.height-h)/2;
+  const url='${pageContext.request.contextPath}/declaration.do?reviewid='+reviewid;
+  const win=open(url,'declarationPopup',`width=${w},height=${h},top=${y},left=${x},resizable=no`);
+  if(!win){ alert('팝업 차단 설정을 확인해주세요.'); }
+}
+
+```
+---
+  
 
