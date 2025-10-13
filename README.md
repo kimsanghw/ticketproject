@@ -423,14 +423,7 @@ ticketproject/
 ### 2) 1차 수집 — 공연 목록(요약) → 저장
 
 - **요청 URL(예시)**
-    GET http://www.kopis.or.kr/openApi/restful/pblprfr
-    ?service=...
-    &stdate=yyyyMMdd
-    &eddate=yyyyMMdd
-    &cpage=1
-    &rows=48
-    &fcltychartr=4
-    &shcate=AAAA
+	GET http://www.kopis.or.kr/openApi/restful/pblprfr?service=...&stdate=yyyyMMdd&eddate=yyyyMMdd&cpage=1&rows=48&fcltychartr=4&shcate=AAAA
 
 - **파싱**  
 - XML 응답의 `<db>` 목록을 **JDOM2**로 파싱하여 **`mt20id`, `prfnm`, `poster`** 추출
