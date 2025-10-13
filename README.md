@@ -386,7 +386,7 @@ ticketproject/
 // Service
 void savePerformanceAndImages(List<PerformanceVO> performances, List<PrfImgVO> prfimgs);
 ```
-```sql
+```xml
 <!-- Mapper (namespace = com.ticketproject.mapper.PerformanceMapper) -->
 <select id="selectPerformanceByMt20id" parameterType="String" resultType="PerformanceVO">
   SELECT prfid, mt20id, prfnm
