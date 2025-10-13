@@ -293,78 +293,78 @@ ticketproject/
 - **Cron**: `0 0 12 1/1 *  *` *(초 분 시 일 월 요일 연도)*  
 - **목적**: 기준일 **±15일** 기간으로 1차 목록 수집 → 저장 후, DB에 적재된 `mt20id` 전부에 대해 **상세 API** 추가 조회/업데이트
 
-```java
-@Scheduled(cron= "0 0 12 1/1 *  * ") //초 분 시 일 월 요일 연도
-    public void apiScheduler() throws Exception {
-		//공연 목록 요청 후 DB에 저장
-    	System.out.println("스케줄러 실행됨");
-    	//System.out.println("1q");
-    	
-    	// 현재 시간 계산
-        LocalDateTime now = LocalDateTime.now();
-
-        // 15일 전과 후의 날짜 계산
-        LocalDateTime startDate = now.minus(15, ChronoUnit.DAYS);
-        LocalDateTime endDate = now.plus(15, ChronoUnit.DAYS);
-
-        // 날짜 형식 설정 (예: "yyyyMMdd")
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-
-        // 동적으로 날짜 생성
-        String stdate = startDate.format(formatter);
-        String eddate = endDate.format(formatter);
-
-        StringBuilder urlBuilder = new StringBuilder("http://www.kopis.or.kr/openApi/restful/pblprfr");
-        urlBuilder.append("?" + URLEncoder.encode("service", "UTF-8") + "=a78255aae24e4b758994653483598aef");
-        urlBuilder.append("&" + URLEncoder.encode("stdate", "UTF-8") + "=" + URLEncoder.encode(stdate, "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("eddate", "UTF-8") + "=" + URLEncoder.encode(eddate, "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("cpage", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("rows", "UTF-8") + "=" + URLEncoder.encode("48", "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("fcltychartr", "UTF-8") + "=" + URLEncoder.encode("4", "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("shcate", "UTF-8") + "=" + URLEncoder.encode("AAAA", "UTF-8"));
-
-        URL url = new URL(urlBuilder.toString());
-        
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/xml");
-
-        SAXBuilder builder = new SAXBuilder();
-       
-        Document document = builder.build(conn.getInputStream());
-        
-        Element root = document.getRootElement();
-       
-        List<Element> dbElements = root.getChildren("db");
-       
-        
-        
-
-        List<PerformanceVO> performanceList = new ArrayList<PerformanceVO>();
-        List<PrfImgVO> prfimgList = new ArrayList<PrfImgVO>();
-        List<String> mt20ids = performanceService.selectMt20id();
-
-        for (Element dbElement : dbElements) {
-        	
-            PerformanceVO performance = new PerformanceVO();
-            performance.setMt20id(dbElement.getChildText("mt20id"));
-            performance.setPrfnm(dbElement.getChildText("prfnm"));
-            performanceList.add(performance);
-           
-
-            PrfImgVO prfimg = new PrfImgVO();
-            prfimg.setPoster(dbElement.getChildText("poster"));
-            prfimg.setPrfid(performance.getPrfid());
-            prfimgList.add(prfimg);
-            //System.out.println("7번"+prfimgList);
-            
-            
-        }
-        performanceService.savePerformanceAndImages(performanceList, prfimgList);
-                        
-        }
-    }
-```
+	```java
+	@Scheduled(cron= "0 0 12 1/1 *  * ") //초 분 시 일 월 요일 연도
+	    public void apiScheduler() throws Exception {
+			//공연 목록 요청 후 DB에 저장
+	    	System.out.println("스케줄러 실행됨");
+	    	//System.out.println("1q");
+	    	
+	    	// 현재 시간 계산
+	        LocalDateTime now = LocalDateTime.now();
+	
+	        // 15일 전과 후의 날짜 계산
+	        LocalDateTime startDate = now.minus(15, ChronoUnit.DAYS);
+	        LocalDateTime endDate = now.plus(15, ChronoUnit.DAYS);
+	
+	        // 날짜 형식 설정 (예: "yyyyMMdd")
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+	
+	        // 동적으로 날짜 생성
+	        String stdate = startDate.format(formatter);
+	        String eddate = endDate.format(formatter);
+	
+	        StringBuilder urlBuilder = new StringBuilder("http://www.kopis.or.kr/openApi/restful/pblprfr");
+	        urlBuilder.append("?" + URLEncoder.encode("service", "UTF-8") + "=a78255aae24e4b758994653483598aef");
+	        urlBuilder.append("&" + URLEncoder.encode("stdate", "UTF-8") + "=" + URLEncoder.encode(stdate, "UTF-8"));
+	        urlBuilder.append("&" + URLEncoder.encode("eddate", "UTF-8") + "=" + URLEncoder.encode(eddate, "UTF-8"));
+	        urlBuilder.append("&" + URLEncoder.encode("cpage", "UTF-8") + "=" + URLEncoder.encode("1", "UTF-8"));
+	        urlBuilder.append("&" + URLEncoder.encode("rows", "UTF-8") + "=" + URLEncoder.encode("48", "UTF-8"));
+	        urlBuilder.append("&" + URLEncoder.encode("fcltychartr", "UTF-8") + "=" + URLEncoder.encode("4", "UTF-8"));
+	        urlBuilder.append("&" + URLEncoder.encode("shcate", "UTF-8") + "=" + URLEncoder.encode("AAAA", "UTF-8"));
+	
+	        URL url = new URL(urlBuilder.toString());
+	        
+	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        conn.setRequestMethod("GET");
+	        conn.setRequestProperty("Content-type", "application/xml");
+	
+	        SAXBuilder builder = new SAXBuilder();
+	       
+	        Document document = builder.build(conn.getInputStream());
+	        
+	        Element root = document.getRootElement();
+	       
+	        List<Element> dbElements = root.getChildren("db");
+	       
+	        
+	        
+	
+	        List<PerformanceVO> performanceList = new ArrayList<PerformanceVO>();
+	        List<PrfImgVO> prfimgList = new ArrayList<PrfImgVO>();
+	        List<String> mt20ids = performanceService.selectMt20id();
+	
+	        for (Element dbElement : dbElements) {
+	        	
+	            PerformanceVO performance = new PerformanceVO();
+	            performance.setMt20id(dbElement.getChildText("mt20id"));
+	            performance.setPrfnm(dbElement.getChildText("prfnm"));
+	            performanceList.add(performance);
+	           
+	
+	            PrfImgVO prfimg = new PrfImgVO();
+	            prfimg.setPoster(dbElement.getChildText("poster"));
+	            prfimg.setPrfid(performance.getPrfid());
+	            prfimgList.add(prfimg);
+	            //System.out.println("7번"+prfimgList);
+	            
+	            
+	        }
+	        performanceService.savePerformanceAndImages(performanceList, prfimgList);
+	                        
+	        }
+	    }
+	```
 
 ### 2) 1차 수집 — 공연 목록(요약) → 저장
 
@@ -382,55 +382,55 @@ ticketproject/
 	3. `performanceService.savePerformanceAndImages(list1, list2)` 호출
 
 - **Service/DAO 핵심 시그니처**
-```java
-// Service
-void savePerformanceAndImages(List<PerformanceVO> performances, List<PrfImgVO> prfimgs);
-```
-```xml
-<!-- Mapper (namespace = com.ticketproject.mapper.PerformanceMapper) -->
-<select id="selectPerformanceByMt20id" parameterType="String" resultType="PerformanceVO">
-  SELECT prfid, mt20id, prfnm
-    FROM performance
-   WHERE mt20id = #{mt20id}
-</select>
-
-<insert id="insertPerformance" parameterType="PerformanceVO" useGeneratedKeys="true" keyProperty="prfid">
-  INSERT INTO performance (mt20id, prfnm)
-  VALUES (#{mt20id}, #{prfnm})
-</insert>
-```
+	```java
+	// Service
+	void savePerformanceAndImages(List<PerformanceVO> performances, List<PrfImgVO> prfimgs);
+	```
+	```xml
+	<!-- Mapper (namespace = com.ticketproject.mapper.PerformanceMapper) -->
+	<select id="selectPerformanceByMt20id" parameterType="String" resultType="PerformanceVO">
+	  SELECT prfid, mt20id, prfnm
+	    FROM performance
+	   WHERE mt20id = #{mt20id}
+	</select>
+	
+	<insert id="insertPerformance" parameterType="PerformanceVO" useGeneratedKeys="true" keyProperty="prfid">
+	  INSERT INTO performance (mt20id, prfnm)
+	  VALUES (#{mt20id}, #{prfnm})
+	</insert>
+	```
 -**Service 구현**
-```java
-// com.ticketproject.service.PerformanceServiceImpl
-@Transactional
-public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<PrfImgVO> prfimgList) {
-    for (PerformanceVO performance : performanceList) {
-        // 1) 공연 존재 여부 확인
-        PerformanceVO existingPerformance =
-            performanceDAO.selectPerformanceByMt20id(performance.getMt20id());
-
-        int prfid;
-        if (existingPerformance == null) {
-            // 2) 신규면 INSERT (useGeneratedKeys=true 로 prfid 세팅)
-            performanceDAO.insertPerformance(performance);
-            prfid = performance.getPrfid();
-        } else {
-            // 3) 기존이면 prfid 재사용
-            prfid = existingPerformance.getPrfid();
-        }
-
-        // 4) 포스터(PrfImg) 저장
-        for (PrfImgVO prfimg : prfimgList) {
-            // 현재 매칭 기준은 prfid. (빌드 시점/저장 시점 차이 주의)
-            if (performance.getPrfid() == prfimg.getPrfid()) {
-                prfimg.setPrfid(prfid);       // 정확한 FK 주입
-                prfimgDAO.insertPrfimg(prfimg);
-                break;
-            }
-        }
-    }
-}
-```
+	```java
+	// com.ticketproject.service.PerformanceServiceImpl
+	@Transactional
+	public void savePerformanceAndImages(List<PerformanceVO> performanceList, List<PrfImgVO> prfimgList) {
+	    for (PerformanceVO performance : performanceList) {
+	        // 1) 공연 존재 여부 확인
+	        PerformanceVO existingPerformance =
+	            performanceDAO.selectPerformanceByMt20id(performance.getMt20id());
+	
+	        int prfid;
+	        if (existingPerformance == null) {
+	            // 2) 신규면 INSERT (useGeneratedKeys=true 로 prfid 세팅)
+	            performanceDAO.insertPerformance(performance);
+	            prfid = performance.getPrfid();
+	        } else {
+	            // 3) 기존이면 prfid 재사용
+	            prfid = existingPerformance.getPrfid();
+	        }
+	
+	        // 4) 포스터(PrfImg) 저장
+	        for (PrfImgVO prfimg : prfimgList) {
+	            // 현재 매칭 기준은 prfid. (빌드 시점/저장 시점 차이 주의)
+	            if (performance.getPrfid() == prfimg.getPrfid()) {
+	                prfimg.setPrfid(prfid);       // 정확한 FK 주입
+	                prfimgDAO.insertPrfimg(prfimg);
+	                break;
+	            }
+	        }
+	    }
+	}
+	```
 동작 요약: mt20id로 공연 존재 여부 검사 → 없으면 INSERT 후 생성된 prfid로 포스터 저장.
 
 
