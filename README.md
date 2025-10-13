@@ -57,7 +57,7 @@
 
 ## 🧭 서비스 구성도
 
-![서비스 구성도](https://github.com/kimsanghw/ticketproject/blob/main/images/service-structure.png)
+![서비스 구성도](https://github.com/kimsanghw/ticketproject/ppt/service-structure.png)
 
 ### 기능 요약
 - **로그인 / 회원가입** → 일반 사용자, 공연장 사용자 구분  
