@@ -423,6 +423,7 @@ ticketproject/
 ### 2) 1차 수집 — 공연 목록(요약) → 저장
 
 - **요청 URL(예시)**
+- 
 	GET http://www.kopis.or.kr/openApi/restful/pblprfr?service=...&stdate=yyyyMMdd&eddate=yyyyMMdd&cpage=1&rows=48&fcltychartr=4&shcate=AAAA
 
 - **파싱**  
